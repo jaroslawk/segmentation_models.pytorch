@@ -40,7 +40,7 @@ efficientnet_encoders = {
                 'num_classes': 1000
             },
         },
-        'out_shapes': (512, 256, 128, 64, 64),
+        'out_shapes': (592, 296, 152, 80, 32),
         'params': {
             'blocks_args': get_model_params('efficientnet-b1', None)[0],
             'global_params': get_model_params('efficientnet-b1', None)[1]
