@@ -1,6 +1,7 @@
 import functools
 import torch.utils.model_zoo as model_zoo
 
+from encoders.efficientnet import efficientnet_encoders
 from .resnet import resnet_encoders
 from .dpn import dpn_encoders
 from .vgg import vgg_encoders
@@ -17,6 +18,7 @@ encoders.update(vgg_encoders)
 encoders.update(senet_encoders)
 encoders.update(densenet_encoders)
 encoders.update(inception_encoders)
+encoders.update(efficientnet_encoders)
 
 
 def get_encoder(name, encoder_weights=None):
