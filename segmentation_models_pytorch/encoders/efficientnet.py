@@ -46,7 +46,6 @@ class EfficientNetEncoder(EfficientNet):
         r = list(reversed([80, 40, 24, 16]))  # [592, 296, 152, 80, 35, 32]
         for l in outputs:
             sz = l.shape
-            print(sz)
             if i < len(r) and sz[1] == r[i]:
                 result.append(l)
                 i = i + 1
