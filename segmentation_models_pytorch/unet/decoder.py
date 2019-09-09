@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn import ConvTranspose2d
 
 from ..common.blocks import Conv2dReLU, SCSEModule
 from ..base.model import Model
@@ -39,6 +40,10 @@ class CenterBlock(DecoderBlock):
         return self.block(x)
 
 
+def up_conv(in_channels, out_channels):
+    return ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)
+
+
 class UnetDecoder(Model):
 
     def __init__(
@@ -61,12 +66,14 @@ class UnetDecoder(Model):
         in_channels = self.compute_channels(encoder_channels, decoder_channels)
         out_channels = decoder_channels
 
-        self.layer1 = DecoderBlock(in_channels[0], out_channels[0],  use_batchnorm=use_batchnorm, attention_type=attention_type)
-        self.layer2 = DecoderBlock(in_channels[1], out_channels[1],  use_batchnorm=use_batchnorm, attention_type=attention_type)
-        self.layer3 = DecoderBlock(in_channels[2], out_channels[2],  use_batchnorm=use_batchnorm, attention_type=attention_type)
-        self.layer4 = DecoderBlock(in_channels[3], out_channels[3],  use_batchnorm=use_batchnorm, attention_type=attention_type)
-        self.layer5 = DecoderBlock(in_channels[4], out_channels[4],  use_batchnorm=use_batchnorm, attention_type=attention_type)
+        self.layer1 = DecoderBlock(592, out_channels[0], use_batchnorm=use_batchnorm, attention_type=attention_type)
+        self.layer2 = DecoderBlock(296, out_channels[1], use_batchnorm=use_batchnorm, attention_type=attention_type)
+        self.layer3 = DecoderBlock(152, out_channels[2], use_batchnorm=use_batchnorm, attention_type=attention_type)
+        self.layer4 = DecoderBlock(80, out_channels[3], use_batchnorm=use_batchnorm, attention_type=attention_type)
+        self.layer5 = DecoderBlock(in_channels[4], out_channels[4], use_batchnorm=use_batchnorm, attention_type=attention_type)
         self.final_conv = nn.Conv2d(out_channels[4], final_channels, kernel_size=(1, 1))
+
+        self._conv1 = nn.Conv2d(1280, 512, kernel_size=1, stride=1, padding=0)
 
         self.initialize()
 
@@ -83,6 +90,8 @@ class UnetDecoder(Model):
     def forward(self, x):
         encoder_head = x[0]
         skips = x[1:]
+
+        encoder_head = self._conv1(encoder_head)
 
         if self.center:
             encoder_head = self.center(encoder_head)
